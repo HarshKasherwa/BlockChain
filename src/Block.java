@@ -9,18 +9,21 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class Block {
 
     private final int index;
-
     private String hash;
     private final String minedByAddress;
     private final String previousHash;
     private final MerkleTree merkleTree;
     private String timestamp;
     private int nonce;
+
+    private ArrayList<Transaction> txnData;
+
     public Block(int index, String previousHash, ArrayList<Transaction> txn_list, String address) {
 
         this.index = index;
         this.previousHash = previousHash;
-        this.merkleTree = new MerkleTree(txn_list);
+        this.txnData = txn_list;
+        this.merkleTree = new MerkleTree(txnData);
         this.minedByAddress = address;
         this.nonce = 0;
         this.hash = calculateHash();
@@ -56,6 +59,10 @@ public class Block {
             new_hash.append(String.format("%02x", b));
 
         return new_hash.toString();
+    }
+
+    public ArrayList<Transaction> getTxnData() {
+        return txnData;
     }
 
     public String getMinedByAddress() {

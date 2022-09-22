@@ -1,16 +1,22 @@
-import java.security.PrivateKey;
-import java.util.ArrayList;
-
-public class TxnOutput {
+public class UTXO {
+    private Transaction txn;
 
     private final int index;
-    private final String address;
-    private final double amount;
 
-    public TxnOutput(int index, String address, double amount) {
+    private final String address;
+
+    private final double amount;
+    public UTXO(int index, String address, double amount) {
         this.address = address;
         this.amount = amount;
         this.index = index;
+    }
+    public void setTxn(Transaction txn) {
+        this.txn = txn;
+    }
+
+    public Transaction getTxn() {
+        return txn;
     }
 
     public String getAddress() {
@@ -21,7 +27,7 @@ public class TxnOutput {
         return amount;
     }
 
-    public  int getIndex() {
+    public int getIndex() {
         return index;
     }
 }

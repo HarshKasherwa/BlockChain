@@ -3,15 +3,12 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.security.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Miner extends Wallet {
 
-    Wallet wallet;
-
     public Miner() {
-        this.wallet = new Wallet();
+//        super();
 //        System.out.println("This: " + this.getAddress());
 //        System.out.println("Wallet: " + wallet.getAddress());
     }
@@ -43,14 +40,16 @@ public class Miner extends Wallet {
 
     public Transaction generateCoinBase(BlockChain blockChain, Miner miner)   {
 
-        ArrayList<TxnOutput> output_list = new ArrayList<>();
-        TxnOutput txnOutput = new TxnOutput(0, miner.getAddress(), blockChain.reward);
-        output_list.add(txnOutput);
-        Transaction coinbase = new Transaction("CoinBase", blockChain.blockChain.size()-1,
-                0, 1, output_list, false );
+        Transaction coinbase = null;
+        ArrayList<UTXO> output_list = new ArrayList<>();
+        UTXO UTXO = new UTXO(0, miner.getAddress(), blockChain.reward);
+        output_list.add(UTXO);
+        coinbase = new Transaction("CoinBase", 0,
+                1, output_list, false );
         coinbase.calculateTxID();
+        UTXO.setTxn(coinbase);
 //        System.out.println("Output list: " + output_list);
-        miner.addUTXO(output_list);
+        miner.addUTXO(output_list.get(0));
         return coinbase;
     }
 
@@ -63,5 +62,47 @@ public class Miner extends Wallet {
         new_block.mineBlock(blockChain.prefix);
         System.out.println("New Block Mined");
         return new_block;
+    }
+
+    public Block generateBlock(Miner miner, String prevBlockHash, BlockChain blockChain, Transaction txn)  {
+
+        ArrayList<Transaction> txn_list = new ArrayList<>();
+        Transaction coinbase = generateCoinBase(blockChain, miner);
+        txn_list.add(coinbase);
+        txn_list.add(txn);
+        Block new_block = new Block(blockChain.blockChain.size(), prevBlockHash, txn_list, miner.getAddress());
+        new_block.mineBlock(blockChain.prefix);
+        System.out.println("New Block Mined");
+        return new_block;
+    }
+
+    public void confirm_txn(Block block, BlockChain blockChain)   {
+
+        ArrayList<Transaction> txn_list = block.getTxnData();
+        for (Transaction txn: txn_list) {
+            txn.setConfirmation(true);
+            txn.setBlockNumber(blockChain.blockChain.size()-1);
+        }
+    }
+
+    public boolean verifyTxn(Transaction tx, PublicKey publicKey) throws SignatureException {
+
+        boolean result = false;
+        String txnID = tx.getTxnID();
+        Signature sign = null;
+        try{
+            sign = Signature.getInstance("SHA256withECDSA", "SunEC");
+        }catch (NoSuchAlgorithmException | NoSuchProviderException e)   {
+            System.out.println("Error: " + e.getMessage());
+        }
+        try {
+            assert sign != null;
+            sign.initVerify(publicKey);
+        }catch (InvalidKeyException e)  {
+            System.out.println("Invalid Key");
+        }
+        byte[] sig = txnID.getBytes();
+        result = sign.verify(sig);
+        return result;
     }
 }

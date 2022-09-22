@@ -1,5 +1,6 @@
 import javax.security.sasl.SaslClient;
 import java.security.*;
+import java.security.spec.ECGenParameterSpec;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -8,17 +9,37 @@ public class Test {
 
     public static void main(String[] args) throws SignatureException {
 
-        Wallet wallet = new Wallet();
-        System.out.println("Public Key: " + wallet.getPublicKey());
-        System.out.println("Private Key: " + wallet.getPrivateKey());
-        System.out.println("Address: " + wallet.getAddress());
-        System.out.println("Signature: " + wallet.getSignature());
+
+        PublicKey publicKey = null;
+        PrivateKey privateKey;
+        Signature signature = null;
+
+        try {
+            KeyPairGenerator g = KeyPairGenerator.getInstance("EC", "SunEC");
+            ECGenParameterSpec ecGenSP = new ECGenParameterSpec("secp224r1");
+            try {
+                g.initialize(ecGenSP);
+            }catch (InvalidAlgorithmParameterException e)   {
+                System.out.println("Invalid Algorithm Parameter");
+            }
+
+            KeyPair kp = g.genKeyPair();
+            privateKey = kp.getPrivate();
+            publicKey = kp.getPublic();
+
+            signature = Signature.getInstance("SHA256withECDSA", "SunEC");
+            signature.initSign(privateKey);
+
+        }catch (NoSuchAlgorithmException e) {
+            System.out.println("No such Algorithm");
+        }catch (NoSuchProviderException | InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
 
         Scanner sc = new Scanner(System.in);
         String msg = sc.nextLine();
         byte[] message = msg.getBytes();
         byte[] sig = null;
-        Signature signature = wallet.getSignature();
         assert signature != null;
         try {
             signature.update(message);
@@ -37,11 +58,13 @@ public class Test {
         }
         try {
             assert sign != null;
-            sign.initVerify(wallet.getPublicKey());
+            sign.initVerify(publicKey);
         }catch (InvalidKeyException e)  {
             System.out.println("Invalid Key");
         }
-        boolean validSign = sign.verify(sig);
+        assert sig != null;
+        sign.update(message);
+        boolean validSign = sign.verify(message);
         System.out.println("verify: " + validSign);
         sc.close();
     }

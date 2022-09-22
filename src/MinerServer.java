@@ -7,14 +7,14 @@ import java.net.Socket;
 
 public class MinerServer {
 
-    public static void main(String[] args) {
+    public void acceptConnection(int listening_port) {
 
-        try(ServerSocket serverSocket = new ServerSocket(5000)) {
+        try(ServerSocket serverSocket = new ServerSocket(listening_port)) {
 
             while (true)    {
 
                 Socket socket = serverSocket.accept();
-                System.out.println("New Connection: " + socket);
+                System.out.println("New miner connected: " + socket);
                 BufferedReader input = new BufferedReader(
                         new InputStreamReader(socket.getInputStream()));
 //                PrintWriter output = new PrintWriter(socket.getOutputStream(), true);

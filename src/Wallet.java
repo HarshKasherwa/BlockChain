@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
 import java.security.MessageDigest;
@@ -14,7 +13,7 @@ public class Wallet {
     public String address;
     private Signature signature;
     private double balance;
-    private ArrayList<TxnOutput> UTXOs;
+    private ArrayList<UTXO> UTXOs;
 
     public Wallet()   {
 
@@ -66,14 +65,14 @@ public class Wallet {
     public double getBalance() {
 
         double bal = 0;
-        for (TxnOutput utxo: UTXOs) {
+        for (UTXO utxo: UTXOs) {
             bal+=utxo.getAmount();
         }
         this.balance = bal;
         return balance;
     }
 
-    public ArrayList<TxnOutput> getUTXOs() {
+    public ArrayList<UTXO> getUTXOs() {
         return UTXOs;
     }
 
@@ -93,12 +92,15 @@ public class Wallet {
         return signature;
     }
 
-    public void addUTXO(ArrayList<TxnOutput> utxo)  {
+    public void addUTXO(UTXO utxo)  {
 
-//        System.out.println("In wallet: " + utxo);
-        for (TxnOutput txn : utxo)  {
-//            System.out.println(txn.getIndex() + " " + txn.getAddress() + " " + txn.getAmount());
-            this.UTXOs.add(txn);
-        }
+        this.UTXOs.add(utxo);
+    }
+
+    public void removeUTXO(UTXO utxo)   {
+
+        this.UTXOs.remove(utxo);
+        if (UTXOs.size() == 0)
+            UTXOs = new ArrayList<>();
     }
 }
