@@ -64,6 +64,12 @@ public class Wallet {
     }
 
     public double getBalance() {
+
+        double bal = 0;
+        for (TxnOutput utxo: UTXOs) {
+            bal+=utxo.getAmount();
+        }
+        this.balance = bal;
         return balance;
     }
 
@@ -89,9 +95,9 @@ public class Wallet {
 
     public void addUTXO(ArrayList<TxnOutput> utxo)  {
 
-        System.out.println("In wallet; " + utxo);
+//        System.out.println("In wallet: " + utxo);
         for (TxnOutput txn : utxo)  {
-
+//            System.out.println(txn.getIndex() + " " + txn.getAddress() + " " + txn.getAmount());
             this.UTXOs.add(txn);
         }
     }

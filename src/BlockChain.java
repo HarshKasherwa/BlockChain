@@ -13,6 +13,7 @@ public class BlockChain {
     public BlockChain(int prefix) {
         this.blockChain = new ArrayList<>();
         this.prefix = prefix;
+        this.reward = 100;
     }
 
     //    public static void main(String[] args) {
