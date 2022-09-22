@@ -8,7 +8,11 @@ import java.util.Scanner;
 
 public class Miner extends Wallet {
 
-    Wallet wallet = new Wallet();
+    Wallet wallet;
+
+    public Miner() {
+        this.wallet = new Wallet();
+    }
 
     public void connectionWithMinerServer(int connecting_port)    {
 
@@ -40,13 +44,15 @@ public class Miner extends Wallet {
         ArrayList<TxnOutput> output_list = new ArrayList<>();
         TxnOutput txnOutput = new TxnOutput(0, wallet.getAddress(), blockChain.reward);
         output_list.add(txnOutput);
-        Transaction coinbase = new Transaction("CoinBase", blockChain.blockChain.size(),
+        Transaction coinbase = new Transaction("CoinBase", blockChain.blockChain.size()-1,
                 0, 1, output_list, false );
         coinbase.calculateTxID();
+        System.out.println("Output list: " + output_list);
+        this.wallet.addUTXO(output_list);
         return coinbase;
     }
 
-    public void generateBlock(String prevBlockHash, BlockChain blockChain)  {
+    public Block generateBlock(String prevBlockHash, BlockChain blockChain)  {
 
         ArrayList<Transaction> txn_list = new ArrayList<>();
         Transaction coinbase = generateCoinBase(blockChain);
@@ -54,5 +60,6 @@ public class Miner extends Wallet {
         Block new_block = new Block(blockChain.blockChain.size(), prevBlockHash, txn_list, address);
         new_block.mineBlock(blockChain.prefix);
         System.out.println("New Block Mined");
+        return new_block;
     }
 }

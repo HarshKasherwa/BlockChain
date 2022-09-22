@@ -32,14 +32,14 @@ public class Block {
         while (!this.hash.substring(0,prefix).equals(prefixString))  {
             nonce++;
             this.hash = calculateHash();
+            Instant time = Instant.now();
+            this.timestamp = time.toString();
         }
     }
 
     private String calculateHash() {
 
-        Instant time = Instant.now();
-        this.timestamp = time.toString();
-        String messageForHash = previousHash + timestamp + merkleTree.getMerkle_root().getHash() + nonce;
+        String messageForHash = previousHash + merkleTree.getMerkle_root().getHash() + nonce;
 
         MessageDigest data;
         byte[] bytes_arr = null;

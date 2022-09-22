@@ -47,16 +47,16 @@ public class Transaction {
     public void calculateTxID(){
 
         Instant time = Instant.now();
-        this.timeStamp = timeStamp.toString();
+        this.timeStamp = time.toString();
         String txnData = "";
         if (this.input_count == 0)    {
-            txnData = txnData + txnType + String.valueOf(blockNumber) + String.valueOf(input_count) +
-                    String.valueOf(output_count) + String.valueOf(output);
+            txnData = txnData + txnType + timeStamp + blockNumber + input_count +
+                    output_count + output;
         }
         else {
-            txnData = txnData + txnType + String.valueOf(blockNumber) +
-                    String.valueOf(input_count) + String.valueOf(input) +
-                    String.valueOf(output_count) + String.valueOf(output);
+            txnData = txnData + txnType + timeStamp + blockNumber +
+                    input_count + input +
+                    output_count + output;
         }
 
         HashCal hash = new HashCal();

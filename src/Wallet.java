@@ -86,4 +86,13 @@ public class Wallet {
     public Signature getSignature() {
         return signature;
     }
+
+    public void addUTXO(ArrayList<TxnOutput> utxo)  {
+
+        System.out.println("In wallet; " + utxo);
+        for (TxnOutput txn : utxo)  {
+
+            this.UTXOs.add(txn);
+        }
+    }
 }
