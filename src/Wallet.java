@@ -1,20 +1,89 @@
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.io.IOException;
+import java.security.*;
+import java.security.spec.ECGenParameterSpec;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.List;
 
-public class Wallet extends Node{
+import static java.nio.charset.StandardCharsets.UTF_8;
 
-    public static void main(String[] args) {
+public class Wallet {
 
-        List<Node> obj = new ArrayList<>();
+    public PublicKey publicKey;
+    private PrivateKey privateKey;
+    public String address;
+    private Signature signature;
+    private double balance;
+    private ArrayList<TxnOutput> UTXOs;
 
-        for (int i = 0; i < 10; i++)    {
-            Node ob = new Node();
-            obj.add(ob);
+    public Wallet()   {
+
+        this.balance = 0;
+        this.UTXOs = new ArrayList<>();
+
+        try {
+            KeyPairGenerator g = KeyPairGenerator.getInstance("EC", "SunEC");
+            ECGenParameterSpec ecGenSP = new ECGenParameterSpec("secp224r1");
+            try {
+                g.initialize(ecGenSP);
+            }catch (InvalidAlgorithmParameterException e)   {
+                System.out.println("Invalid Algorithm Parameter");
+            }
+
+            KeyPair kp = g.genKeyPair();
+            this.privateKey = kp.getPrivate();
+            this.publicKey = kp.getPublic();
+
+            this.signature = Signature.getInstance("SHA256withECDSA", "SunEC");
+            this.signature.initSign(this.privateKey);
+
+        }catch (NoSuchAlgorithmException e) {
+            System.out.println("No such Algorithm");
+        }catch (NoSuchProviderException | InvalidKeyException e) {
+            throw new RuntimeException(e);
         }
 
-        for (Node ob: obj)
-            System.out.println("Address : " + ob.getAddress());
+        MessageDigest data;
+        byte[] bytes_arr = null;
+
+        assert publicKey != null;
+        String publicKeyStr = publicKey.toString();
+        try {
+                data = MessageDigest.getInstance("SHA-256");
+                bytes_arr = data.digest(publicKeyStr.getBytes(UTF_8));
+        }catch (NoSuchAlgorithmException e) {
+            System.out.println("No Such Algorithm");
+        }
+
+        StringBuilder address_hash = new StringBuilder();
+        assert bytes_arr != null;
+        for (byte b : bytes_arr)
+            address_hash.append(String.format("%02x", b));
+
+        this.address = address_hash.toString();
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public ArrayList<TxnOutput> getUTXOs() {
+        return UTXOs;
+    }
+
+    public PublicKey getPublicKey() {
+        return publicKey;
+    }
+
+    public PrivateKey getPrivateKey() {
+        return privateKey;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public Signature getSignature() {
+        return signature;
     }
 }

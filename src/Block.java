@@ -1,39 +1,45 @@
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.util.ArrayList;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Block {
 
+    private final int index;
+
     private String hash;
+    private final String minedByAddress;
     private final String previousHash;
-    private final String transaction_data;
-    private final String timestamp;
+    private final MerkleTree merkleTree;
+    private String timestamp;
     private int nonce;
+    public Block(int index, String previousHash, ArrayList<Transaction> txn_list, String address) {
 
-    public Block(String previousHash, String transaction_data, String timestamp) {
-
+        this.index = index;
         this.previousHash = previousHash;
-        this.transaction_data = transaction_data;
-        this.timestamp = timestamp;
+        this.merkleTree = new MerkleTree(txn_list);
+        this.minedByAddress = address;
         this.nonce = 0;
         this.hash = calculateHash();
     }
 
-    public String mineBlock(int prefix) {
+    public void mineBlock(int prefix) {
 
         String prefixString = new String(new char[prefix]).replace('\0', '0');
-        while (!hash.substring(0,prefix).equals(prefixString))  {
+        while (!this.hash.substring(0,prefix).equals(prefixString))  {
             nonce++;
-            hash = calculateHash();
+            this.hash = calculateHash();
         }
-
-        return hash;
     }
 
     private String calculateHash() {
 
-        String messageForHash = previousHash + timestamp + nonce + transaction_data;
+        Instant time = Instant.now();
+        this.timestamp = time.toString();
+        String messageForHash = previousHash + timestamp + merkleTree.getMerkle_root().getHash() + nonce;
 
         MessageDigest data;
         byte[] bytes_arr = null;
@@ -52,6 +58,14 @@ public class Block {
         return new_hash.toString();
     }
 
+    public String getMinedByAddress() {
+        return minedByAddress;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
     public String getHash() {
         return hash;
     }
@@ -60,8 +74,8 @@ public class Block {
         return previousHash;
     }
 
-    public String getTransaction_data() {
-        return transaction_data;
+    public MerkleTree getMerkleTree() {
+        return merkleTree;
     }
 
     public String getTimestamp() {

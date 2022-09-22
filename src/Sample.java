@@ -15,10 +15,10 @@ public class Sample {
         Instant time;
         String message = sc.next();
         time = Instant.now();
-        Block obj = new Block(prefixString, message, time.toString());
-        System.out.println("Prev_Hash: " + obj.getPreviousHash());
-        System.out.println("Data: " + obj.getTransaction_data());
-        System.out.println("Timestamp: " + obj.getTimestamp());
+//        Block obj = new Block(prefixString, message, time.toString());
+//        System.out.println("Prev_Hash: " + obj.getPreviousHash());
+//        System.out.println("Data: " + obj.getTransaction_data());
+//        System.out.println("Timestamp: " + obj.getTimestamp());
 
         sc.close();
     }
