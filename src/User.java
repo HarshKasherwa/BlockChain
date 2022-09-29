@@ -63,9 +63,8 @@ public class User extends Wallet{
         else {
             UTXO receiver_utxo = new UTXO(0, receiver.getAddress(), amount);
         }
-        Transaction new_Txn = new Transaction("Normal", input_utxo.size(), input_utxo,
+        Transaction new_Txn = new Transaction(sender.getPrivateKey(), "Normal", input_utxo.size(), input_utxo,
                 ouput_utxo.size(), ouput_utxo, false);
-        new_Txn.calculateTxID();
         for (UTXO t: new_Txn.getOutput()){
             t.setTxn(new_Txn);
         }
@@ -79,9 +78,7 @@ public class User extends Wallet{
         }catch (SignatureException e)   {
             System.out.println("Error: " + e.getMessage());
         }
-        assert sig != null;
-        String signed_Txn_ID = Arrays.toString(sig);
-//        new_Txn.setTxnID(new_Txn);
+
         return new_Txn;
     }
 }

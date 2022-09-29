@@ -143,7 +143,7 @@ public class Driver {
                     }
                     assert m_obj != null;
                     m_obj.addUTXO(t);
-                    System.out.println("UTXO added");
+//                    System.out.println("UTXO added");
                 }
             }
             if (input == 5) {

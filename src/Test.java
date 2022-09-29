@@ -1,7 +1,5 @@
-import javax.security.sasl.SaslClient;
 import java.security.*;
 import java.security.spec.ECGenParameterSpec;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -16,7 +14,7 @@ public class Test {
 
         try {
             KeyPairGenerator g = KeyPairGenerator.getInstance("EC", "SunEC");
-            ECGenParameterSpec ecGenSP = new ECGenParameterSpec("secp224r1");
+            ECGenParameterSpec ecGenSP = new ECGenParameterSpec("secp256r1");
             try {
                 g.initialize(ecGenSP);
             }catch (InvalidAlgorithmParameterException e)   {
@@ -64,8 +62,9 @@ public class Test {
         }
         assert sig != null;
         sign.update(message);
-        boolean validSign = sign.verify(message);
+        boolean validSign = sign.verify(sig);
         System.out.println("verify: " + validSign);
+        System.out.println("Sig: " + Arrays.toString(sig));
         sc.close();
     }
 }

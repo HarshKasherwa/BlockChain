@@ -1,9 +1,13 @@
+import sun.misc.Signal;
+
+import java.security.*;
 import java.time.Instant;
 import java.util.ArrayList;
 
 
 public class Transaction {
 
+    private byte[] digital_sign;
     private String txnID;
     private final String txnType;
     public int blockNumber;
@@ -12,6 +16,11 @@ public class Transaction {
     private final int output_count;
     private final ArrayList<UTXO> output;
     private String timeStamp;
+
+    public byte[] getDigital_sign() {
+        return digital_sign;
+    }
+
     private boolean confirmation;
 
     public void setTxnID(String txnID) {
@@ -23,7 +32,7 @@ public class Transaction {
     }
 
     //coinbase transaction constructor
-    public Transaction(String txnType,int input_count,
+    public Transaction(PrivateKey privateKey,String txnType,int input_count,
                        int output_count, ArrayList<UTXO> output,
                        boolean confirmation) {
 
@@ -33,10 +42,12 @@ public class Transaction {
         this.output_count = output_count;
         this.output = output;
         this.confirmation = confirmation;
+        calculateTxID();
+        calDigitalSignature(privateKey);
     }
 
     //Normal txn constructor
-    public Transaction(String txnType,
+    public Transaction(PrivateKey privateKey, String txnType,
                        int input_count, ArrayList<UTXO> input,
                        int output_count, ArrayList<UTXO> output,
                        boolean confirmation) {
@@ -48,9 +59,11 @@ public class Transaction {
         this.output_count = output_count;
         this.output = output;
         this.confirmation = confirmation;
+        calculateTxID();
+        calDigitalSignature(privateKey);
     }
 
-    public void calculateTxID(){
+    private void calculateTxID(){
 
         Instant time = Instant.now();
         this.timeStamp = time.toString();
@@ -67,6 +80,32 @@ public class Transaction {
 
         HashCal hash = new HashCal();
         this.txnID = hash.calculateHash(txnData);
+    }
+
+    private void calDigitalSignature(PrivateKey privateKey)  {
+
+        Signature signature = null;
+        try{
+             signature = Signature.getInstance("SHA256withECDSA", "SunEC");
+            signature.initSign(privateKey);
+        }catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeyException e)   {
+            System.out.println("Sorry: " + e.getMessage());
+        }
+
+        byte[] message = this.txnID.getBytes();
+        try {
+
+            assert signature != null;
+            signature.update(message);
+        }catch (SignatureException e)   {
+            System.out.println(e.getMessage());
+        }
+        try {
+
+            this.digital_sign = signature.sign();
+        }catch (SignatureException e)   {
+            System.out.println(e.getMessage());
+        }
     }
 
     public String getTxnID() {

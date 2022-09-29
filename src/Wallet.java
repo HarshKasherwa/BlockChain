@@ -22,7 +22,7 @@ public class Wallet {
 
         try {
             KeyPairGenerator g = KeyPairGenerator.getInstance("EC", "SunEC");
-            ECGenParameterSpec ecGenSP = new ECGenParameterSpec("secp224r1");
+            ECGenParameterSpec ecGenSP = new ECGenParameterSpec("secp256r1");
             try {
                 g.initialize(ecGenSP);
             }catch (InvalidAlgorithmParameterException e)   {

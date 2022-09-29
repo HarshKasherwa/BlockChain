@@ -17,19 +17,21 @@ public class Miner extends Wallet {
 
         try(Socket socket = new Socket("localhost", connecting_port))  {
 
-            PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-            Scanner sc = new Scanner(System.in);
+            Scanner sc;
+            try (PrintWriter output = new PrintWriter(socket.getOutputStream(), true)) {
+                sc = new Scanner(System.in);
 
-            while (true)    {
+                while (true) {
 
-                System.out.print("Enter message: ");
-                String message = sc.nextLine();
-                System.out.println();
-                output.println(message);
-                if (message.equals("exit")) {
-                    socket.close();
-                    System.out.println("Connection closed");
-                    break;
+                    System.out.print("Enter message: ");
+                    String message = sc.nextLine();
+                    System.out.println();
+                    output.println(message);
+                    if (message.equals("exit")) {
+                        socket.close();
+                        System.out.println("Connection closed");
+                        break;
+                    }
                 }
             }
             sc.close();
@@ -44,9 +46,8 @@ public class Miner extends Wallet {
         ArrayList<UTXO> output_list = new ArrayList<>();
         UTXO UTXO = new UTXO(0, miner.getAddress(), blockChain.reward);
         output_list.add(UTXO);
-        coinbase = new Transaction("CoinBase", 0,
+        coinbase = new Transaction(miner.getPrivateKey(), "CoinBase", 0,
                 1, output_list, false );
-        coinbase.calculateTxID();
         UTXO.setTxn(coinbase);
 //        System.out.println("Output list: " + output_list);
         miner.addUTXO(output_list.get(0));
@@ -88,7 +89,7 @@ public class Miner extends Wallet {
     public boolean verifyTxn(Transaction tx, PublicKey publicKey) throws SignatureException {
 
         boolean result = false;
-        String txnID = tx.getTxnID();
+        byte[] txnID = tx.getTxnID().getBytes();
         Signature sign = null;
         try{
             sign = Signature.getInstance("SHA256withECDSA", "SunEC");
@@ -101,8 +102,8 @@ public class Miner extends Wallet {
         }catch (InvalidKeyException e)  {
             System.out.println("Invalid Key");
         }
-        byte[] sig = txnID.getBytes();
-        result = sign.verify(sig);
+        sign.update(txnID);
+        result = sign.verify(tx.getDigital_sign());
         return result;
     }
 }
